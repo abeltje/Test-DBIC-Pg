@@ -1,0 +1,9 @@
+lib/Test/DBIC/Pg.pm
+MANIFEST			This list of files
+MANIFEST.SKIP
+t/10-connect_dbic_pg_ok.t
+t/lib/DummySchema.pm
+xt/00-compile.t
+xt/10-manifest.t
+xt/20-pod.t
+xt/30-pod-coverage.t
