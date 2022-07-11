@@ -1,5 +1,4 @@
-#! perl -w
-use v5.10;
+#! perl -I. -w
 use strict;
 
 use Test::Pod;

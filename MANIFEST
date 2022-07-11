@@ -1,9 +1,14 @@
 lib/Test/DBIC/Pg.pm
 MANIFEST			This list of files
 MANIFEST.SKIP
+META.json
+META.yml
+README.md
 t/10-connect_dbic_pg_ok.t
 t/lib/DummySchema.pm
-xt/00-compile.t
-xt/10-manifest.t
-xt/20-pod.t
-xt/30-pod-coverage.t
+t/Test/abeltje.pm
+xt/00-manifest.t
+xt/01-compile.t
+xt/02-pod_syntax.t
+xt/03-pod-coverage.t
+xt/04-kwalitee.t

@@ -1,12 +1,8 @@
-#! perl -w
-use strict;
-
-use lib 't/lib';
-
+#! perl -I. -w
 use Test::Tester;
-use Test::More;
+use t::Test::abeltje;
 
-use Test::DBIC::Pg;
+use Test::DBIC::DBDC_Pg;
 
 my $dbname = "_test_dbic_pg_$$";
 
@@ -18,20 +14,46 @@ my $dbname = "_test_dbic_pg_$$";
         },
         {
             ok   => 1,
-            name => "dbi:Pg:dbname=$dbname ISA DummySchema"
+            name => "the schema ISA DummySchema"
         }
     );
     # Nog wat testjes op $schema
 
-    # test the drop function
-    check_test(
-        sub {  drop_dbic_pg_ok() },
-        {
-            ok => 1,
-            name => "dbi:Pg:dbname=$dbname DROPPED",
-        }
-    );
+   # test the drop function
+   check_test(
+       sub {  drop_dbic_pg_ok() },
+       {
+           ok => 1,
+           name => "$dbname DROPPED",
+       }
+   );
 }
 
+{
+    my ($td, $schema);
+    check_test(
+        sub {
+            $td = Test::DBIC::DBDC_Pg->new(
+                schema_class => 'DummySchema',
+                TMPL_DB => 'postgres',
+            );
+            $schema = $td->connect_dbic_ok();
+        },
+        {
+            ok   => 1,
+            name => "the schema ISA DummySchema"
+        }
+    );
+    # Nog wat testjes op $schema
 
-done_testing();
+   # test the drop function
+   check_test(
+       sub {  $td->drop_dbic_ok() },
+       {
+           ok => 1,
+           name => "$dbname DROPPED",
+       }
+   );
+}
+
+abeltje_done_testing();

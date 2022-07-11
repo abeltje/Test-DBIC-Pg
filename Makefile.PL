@@ -13,10 +13,13 @@ WriteMakefile(
     PREREQ_PM => {
         'Test::Simple' => 0,
         'DBI'          => 0,
-        'DBD::Pg'  => 0,
+        'DBD::Pg'      => 0,
     },
     BUILD_REQUIRES => {
-        'Test::Tester' => 0,
+        'Test::Simple'   => 0.88,
+        'Test::Tester'   => 0,
+        'Test::Warnings' => 0,
+        'Test::Fatal'    => 0,
     },
 
     MIN_PERL_VERSION => '5.010001',
@@ -27,7 +30,7 @@ WriteMakefile(
             homepage   => '',
             repository => {
                 type => 'git',
-                url  => 'https://github.xs4all.net/abetim/Test-DBIC-SQLite.git',
+                url  => 'https://github.com/abeltje/Test-DBIC-SQLite.git',
             },
         },
         'x_IRC' => 'irc://irc.perl.org/#amsterdam.pm',
