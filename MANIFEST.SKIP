@@ -4,6 +4,6 @@ tags
 pm_to_blib
 blib/
 cover_db/
-Makefile
+Makefile$
 MYMETA\..+
 lib/Test/DBIC/Pg_old.pm

@@ -2,7 +2,7 @@
 use Test::Tester;
 use t::Test::abeltje;
 
-use Test::DBIC::DBDC_Pg;
+use Test::DBIC::Pg;
 
 my $dbname = "_test_dbic_pg_$$";
 
@@ -33,7 +33,7 @@ my $dbname = "_test_dbic_pg_$$";
     my ($td, $schema);
     check_test(
         sub {
-            $td = Test::DBIC::DBDC_Pg->new(
+            $td = Test::DBIC::Pg->new(
                 schema_class => 'DummySchema',
                 TMPL_DB => 'postgres',
             );

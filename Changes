@@ -1,0 +1,12 @@
+Changes on 2022-07-11 for repository at:
+  Fetch URL: ssh://git@source.test-smoke.org:9999/~/Test-DBIC-Pg
+  Push  URL: ssh://git@source.test-smoke.org:9999/~/Test-DBIC-Pg
+
+Enjoy!
+
+0.00_00 2019-05-22T11:54:25+02:00 (6854f8a => Abe Timmerman)
+ - (Abe Timmerman, Wed, 22 May 2019 11:54:25 +0200) Initial commit
+ -     Pure rip-off of Test-DBIC-SQLite and a hack!
+
+ - (Abe Timmerman, Mon, 11 Jul 2022 12:28:22 +0200) Update to
+   t::Test::abeltje to 1.07

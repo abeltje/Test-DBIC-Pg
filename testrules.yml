@@ -1,0 +1,3 @@
+seq:
+  - seq: t/00-connection-basics.t
+  - par: "t/{1,2}*.t"
