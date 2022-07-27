@@ -1,8 +1,12 @@
-Changes on 2022-07-11 for repository at:
+Changes on 2022-07-27 for repository at:
   Fetch URL: ssh://git@source.test-smoke.org:9999/~/Test-DBIC-Pg
   Push  URL: ssh://git@source.test-smoke.org:9999/~/Test-DBIC-Pg
 
 Enjoy!
+
+0.99_01 2022-07-27T15:44:43+02:00 (13d4ead => Abe Timmerman)
+ - (Abe Timmerman, Wed, 27 Jul 2022 15:44:43 +0200) Autocommit for
+   distribution Test::DBIC::Pg 0.99_01 (test)
 
 0.00_00 2019-05-22T11:54:25+02:00 (6854f8a => Abe Timmerman)
  - (Abe Timmerman, Wed, 22 May 2019 11:54:25 +0200) Initial commit
@@ -10,3 +14,10 @@ Enjoy!
 
  - (Abe Timmerman, Mon, 11 Jul 2022 12:28:22 +0200) Update to
    t::Test::abeltje to 1.07
+
+ - (Abe Timmerman, Wed, 13 Jul 2022 11:18:05 +0200) Copy more test-stuff
+   from Test::DBIC::SQLite
+ -     More to come
+
+ - (Abe Timmerman, Wed, 27 Jul 2022 15:20:32 +0200) First attempt to create
+   a distribution

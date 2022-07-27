@@ -2,7 +2,7 @@ package Test::DBIC::Pg;
 use Moo;
 with 'Test::DBIC::DBDConnector';
 
-our $VERSION = "0.99_00";
+our $VERSION = "0.99_01";
 
 use DBI;
 
