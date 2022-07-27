@@ -24,7 +24,7 @@ use Test::DBIC::Pg;
         },
         "\$td = Test::DBIC::Pg->new(); \$td->connect_dbic_ok()"
     );
-    my $db_name = $td->pg_tmp_connect_dsn->{dbname};
+    my $db_name = $td->_pg_tmp_connect_dsn->{dbname};
 
     my $broadway = $schema->resultset('Album')->search(
         { name => 'Broadway the Hard Way' }
@@ -77,7 +77,7 @@ use Test::DBIC::Pg;
         },
         "Create SQLite in a file"
     );
-    my $db_name = $td->pg_tmp_connect_dsn->{dbname};
+    my $db_name = $td->_pg_tmp_connect_dsn->{dbname};
 
     my $broadway = $schema->resultset('Album')->search(
         { name => 'Broadway the Hard Way' }

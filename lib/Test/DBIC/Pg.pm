@@ -1,8 +1,6 @@
 package Test::DBIC::Pg;
 use Moo;
-with qw(
-    Test::DBIC::DBDConnector
-);
+with 'Test::DBIC::DBDConnector';
 
 our $VERSION = "0.99_00";
 
@@ -11,15 +9,12 @@ use DBI;
 use parent 'Test::Builder::Module';
 our @EXPORT = qw( connect_dbic_pg_ok drop_dbic_pg_ok );
 
-# Types::Standard::Optional conflicts with
-# MooX::Params::CompiledValidators->Optional as we *do*
-# MooX::Params::CompiledValidators, it is less confusing to name
-# Types::Standard::Optional explicitly;
-use Types::Standard qw( Maybe Dict StrMatch Str HashRef );
+$Test::DBIC::Pg::LeaveCreatedDatabases //= 0;
 
 # allow for DBI options syntax: dbi:Pg(FetchHashKeyName=>NAME_uc):dbname=blah
 my $dsn_regex = qr{^ dbi:Pg(?:\(.+?\))?: }x;
 
+use Types::Standard qw( Bool Dict HashRef Maybe Str StrMatch );
 has '+dbi_connect_info' => (
     is   => 'ro',
     type => Dict [
@@ -30,7 +25,7 @@ has '+dbi_connect_info' => (
     ],
     default => sub { { dsn => "dbi:Pg:dbname=_test_dbic_pg_$$" } },
 );
-has pg_tmp_connect_dsn => (
+has _pg_tmp_connect_dsn => (
     is  => 'rwp',
     isa => Maybe [
         Dict [
@@ -52,18 +47,39 @@ has TMPL_DB => (
     is      => 'ro',
     default => sub {'template1'},
 );
+has _did_create => (
+    is      => 'rwp',
+    isa     => Bool,
+    default => 0,
+);
+
+# Keep a "singleton" around for the functional interface.
+my $_tdbc_cache;
 
 sub _build__tmp_connection {
     my $self = shift;
     return DBI->connect(
-        $self->pg_tmp_connect_dsn->{tmp_dsn},
-        $self->pg_tmp_connect_dsn->{username},
-        $self->pg_tmp_connect_dsn->{password},
+        $self->_pg_tmp_connect_dsn->{tmp_dsn},
+        $self->_pg_tmp_connect_dsn->{username},
+        $self->_pg_tmp_connect_dsn->{password},
     );
 }
 
-# Keep a "singleton" around for the functional interface.
-my $_tdbc_cache;
+sub DEMOLISH {
+    my $self = shift;
+    if ($self->_did_create && !$Test::DBIC::Pg::LeaveCreatedDatabases) {
+        my $dbh = $self->_tmp_connection;
+        local (
+            $dbh->{PrintError}, $dbh->{RaiseError},
+            $dbh->{PrintWarn}, $dbh->{RaiseWarn}
+        );
+        $dbh->do(
+            sprintf("DROP DATABASE %s", $self->_pg_tmp_connect_dsn->{dbname})
+        );
+        $self->_set__did_create(0);
+        $dbh->disconnect;
+    }
+}
 
 sub connect_dbic_pg_ok {
     my $class = __PACKAGE__;
@@ -82,11 +98,19 @@ sub connect_dbic_pg_ok {
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my $schema =  $_tdbc_cache->connect_dbic_ok();
+    if (!$schema) {
+        undef($_tdbc_cache);
+    }
 
     return $schema;
 }
 
 sub drop_dbic_pg_ok {
+    if (!defined($_tdbc_cache)) {
+        my $msg = "no database DROPPED";
+        return $_tdbc_cache->builder->ok(1, $msg);
+    }
+
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     my $result = $_tdbc_cache->drop_dbic_ok();
 
@@ -97,7 +121,7 @@ sub drop_dbic_pg_ok {
 
 sub drop_dbic_ok {
     my $self = shift;
-    my $dbname = $self->pg_tmp_connect_dsn->{dbname};
+    my $dbname = $self->_pg_tmp_connect_dsn->{dbname};
     my $msg = "$dbname DROPPED";
 
     my $dbh = $self->_tmp_connection();
@@ -108,6 +132,7 @@ sub drop_dbic_ok {
     }
     $dbh->disconnect();
     $self->_clear_tmp_connection;
+    $self->_set__did_create(0);
 
     return $self->builder->ok(1, $msg);
 }
@@ -125,7 +150,7 @@ sub MyDBD_connection_parameters {
     );
 
     my $tmp_dsn_info = $self->_parse_pg_dsn($pg_connect_info->{dsn});
-    $self->_set_pg_tmp_connect_dsn(
+    $self->_set__pg_tmp_connect_dsn(
         {
             %$pg_connect_info,
             %$tmp_dsn_info,
@@ -139,16 +164,17 @@ sub MyDBD_connection_parameters {
 sub MyDBD_check_wants_deploy {
     my $self = shift;
 
-    local $ENV{PGHOST} = $self->pg_tmp_connect_dsn->{pghost} if not $ENV{PGHOST};
+    local $ENV{PGHOST} = $self->_pg_tmp_connect_dsn->{pghost} if not $ENV{PGHOST};
     my $dbh = $self->_tmp_connection;
 
     my @known_dbs = $dbh->data_sources();
     my $wants_deploy = not grep {
-        m{dbname=(.+?)(?=;|$)} && $1 eq $self->pg_tmp_connect_dsn->{dbname}
+        m{dbname=(.+?)(?=;|$)} && $1 eq $self->_pg_tmp_connect_dsn->{dbname}
     } @known_dbs;
 
     if ($wants_deploy) {
-        my $rows = $dbh->do("CREATE DATABASE ". $self->pg_tmp_connect_dsn->{dbname});
+        my $rows = $dbh->do("CREATE DATABASE ". $self->_pg_tmp_connect_dsn->{dbname});
+        $self->_set__did_create(1);
     }
     $dbh->disconnect();
     $self->_clear_tmp_connection;
@@ -185,7 +211,7 @@ around ValidationTemplates => sub {
     my $vt = shift;
     my $class = shift;
 
-    use Types::Standard qw( HashRef ArrayRef Dict StrMatch Str );
+    use Types::Standard qw( ArrayRef Dict HashRef Maybe Str StrMatch );
 
     my $validation_templates = $class->$vt();
     return {
@@ -193,18 +219,18 @@ around ValidationTemplates => sub {
         connection_info  => { type => ArrayRef },
         dsn              => { type => StrMatch [$dsn_regex] },
         dbi_connect_info => {
-            type => Dict [
+            type => Maybe [Dict [
                 dsn      => StrMatch [$dsn_regex],
                 username => Types::Standard::Optional [Str],
                 password => Types::Standard::Optional [Str],
                 options  => Types::Standard::Optional [HashRef],
-            ],
+            ]],
             default => sub { { dsn => "dbi:Pg:dbname=_test_dbic_pg_$$" } }
         },
     };
 };
 
-use namespace::autoclean;
+use namespace::autoclean 0.16;
 1;
 
 =pod
@@ -388,6 +414,14 @@ list of available database is requested - via C<< $dbh->data_sources() >> - to
 check if the test database already exists. If it doesn't, the database will be
 created and a true value is returned, otherwise a false value is returned and no
 new database is created.
+
+=begin devel_cover_pod
+
+=head2 DEMOLISH
+
+Remove created database files when the object goes out of scope.
+
+=end devel_cover_pod
 
 =head1 AUTHOR
 
