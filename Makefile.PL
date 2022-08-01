@@ -11,7 +11,7 @@ WriteMakefile(
     AUTHOR        => 'Abe Timmerman <abeltje@cpan.org>',
 
     PREREQ_PM => {
-        'Test::DBIC::SQLite' => '1.00_02',
+        'Test::DBIC::SQLite' => '1.01',
         'DBD::Pg'            => '3.7.0',
     },
     BUILD_REQUIRES => {
@@ -20,6 +20,9 @@ WriteMakefile(
         'Test::Warnings' => 0,
         'Test::Fatal'    => 0,
         'YAML'           => 0,
+    },
+    CONFIGURE_REQUIRES => {
+        'ExtUtils::MakeMaker' => '6.55_03',
     },
 
     MIN_PERL_VERSION => '5.010001',

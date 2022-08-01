@@ -22,6 +22,7 @@ t/lib/Music/Schema/Result/Config.pm
 t/lib/Music/Schema/Result/Song.pm
 t/madness.yml
 t/zappa.yml
+testrules.yml
 xt/00-manifest.t
 xt/01-compile.t
 xt/02-pod_syntax.t
