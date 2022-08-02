@@ -12,8 +12,9 @@ use base 'DBIx::Class::Schema';
 __PACKAGE__->load_namespaces;
 
 
-# Created by DBIx::Class::Schema::Loader v0.07049 @ 2021-04-14 01:57:02
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:uoRonhRcnWwbKvlHK0BdYw
+# Created by DBIx::Class::Schema::Loader v0.07049 @ 2022-08-01 18:25:13
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:DmIXrG9H01OI7uyyPLOZAg
+
 
 our $DB_VERSION = 1;
 
@@ -77,4 +78,5 @@ sub deploy {
         ]
     );
 }
+
 1;
