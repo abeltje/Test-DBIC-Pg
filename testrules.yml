@@ -1,5 +1,5 @@
 ---
 seq:
-  - seq: t/00*.t
-  - seq: t/*.t
+  - seq: t/0*.t
+  - seq: t/1*.t
 

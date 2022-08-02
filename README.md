@@ -5,30 +5,28 @@ Test::DBIC::Pg - Connect to and deploy a DBIx::Class::Schema on Postgres
 # SYNOPSIS
 
 The preferred way:
-
 ```perl
-    #! perl -w
-    use Test::More;
-    use Test::DBIC::Pg;
+#! perl -w
+use Test::More;
+use Test::DBIC::Pg;
 
-    my $td = Test::DBIC::Pg->new(schema_class => 'My::Schema');
-    my $schema = $td->connect_dbi_ok();
-    ...
-    $td->drop_dbic_ok();
-    done_testing();
+my $td = Test::DBIC::Pg->new(schema_class => 'My::Schema');
+my $schema = $td->connect_dbi_ok();
+...
+$schema->storage->disconnect();
+$td->drop_dbic_ok();
+done_testing();
 ```
-
-The compatible with
-[Test::DBIC::SQLite](https://metacpan.org/pod/Test%3A%3ADBIC%3A%3ASQLite) way:
-
+The compatible with [Test::DBIC::SQLite](https://metacpan.org/pod/Test%3A%3ADBIC%3A%3ASQLite) way:
 ```perl
-    #! perl -w
-    use Test::More;
-    use Test::DBIC::Pg;
-    my $schema = connect_dbic_pg_ok('My::Schema');
-    ...
-    drop_dbic_pg_ok();
-    done_testing();
+#! perl -w
+use Test::More;
+use Test::DBIC::Pg;
+my $schema = connect_dbic_pg_ok('My::Schema');
+...
+$schema->storage->disconnect();
+drop_dbic_pg_ok();
+done_testing();
 ```
 
 # DESCRIPTION
@@ -40,29 +38,24 @@ It will `import()` [warnings](https://metacpan.org/pod/warnings) and [strict](ht
 
 ## `Test::DBIC::Pg->new`
 
-```perl
     my $td = Test::DBIC::Pg->new(%parameters);
     my $schema = $td->connect_dbic_ok();
     ...
+    $schema->storage->disconnect();
     $td->drop_dbic_ok();
-```
 
 ### Parameters
 
 Named, list:
 
-- **`schema_class`** => `$schema_class` (_Required_)
-
+- **`schema_class`** => `$schema_class` (_Required_)  
     The class name of the [DBIx::Class::Schema](https://metacpan.org/pod/DBIx%3A%3AClass%3A%3ASchema) to use.
 
-
 - **`dbi_connect_info`** => `$pg_connect_info` (_Optional_,
-`{ dsn => "dbi:Pg:dbname=_test_dbic_pg_$$" }`)
-
+`{ dsn => "dbi:Pg:dbname=_test_dbic_pg_$$" }`)  
     This is a HashRef that will be used to connect to the PostgreSQL server:
 
-    - **`dsn`** => `dbi:Pg:host=mypg;dbname=_my_test_x`
-
+    - **`dsn`** => `dbi:Pg:host=mypg;dbname=_my_test_x`  
         This Data Source Name (dsn) must also contain the `dbi:Pg:` bit that is needed
         for [DBI](https://metacpan.org/pod/DBI) to connect to your database/server.
         We do allow for DBI options syntax: `dbi:Pg(FetchHashKeyName=>NAME_uc):dbname=blah`
@@ -70,40 +63,33 @@ Named, list:
         If your database doesn't exist it will be created. This will need an extra
         temporary database connection.
 
-    - **`username`** => `$username`
-
+    - **`username`** => `$username`  
         This is the username that will be used to connect to the PostgreSQL server, if
         omitted [DBD::Pg](https://metacpan.org/pod/DBD%3A%3APg) will try to use `$ENV{PGUSER}`.
 
-    - **`password`** => `$password`
+    - **`password`** => `$password`  
+        This is the password that will be used to connect to the PostgreSQL
+        server, if omitted [DBD::Pg](https://metacpan.org/pod/DBD%3A%3APg) will
+        look at `~/.pgpass` to see if it can find a suitable password in there.
+        (See also postgres docs for `$ENV{PGPASSWORD}` en `$ENV{PGPASSFILE}`).
 
-        This is the password that will be used to connect to the PostgreSQL server, if
-        omitted [DBD::Pg](https://metacpan.org/pod/DBD%3A%3APg) will look at `~/.pgpass` to see if it can find a suitable
-        password in there. (See also postgres docs for `$ENV{PGPASSWORD}` en
-        `$ENV{PGPASSFILE}`).
+    - **`options`** => `$options_hash`  
+        This options hashref is also passed to the
+        `DBIx::Class::Schema->connect()` method for extra options. This hash
+        will contain the extra key/value pair `skip_version => 1` whenever the
+        **wants\_deploy** attribute is true.
 
-    - **`options`** => `$options_hash`
-
-        This options hashref is also passed to the `DBIx::Class::Schema->connect()`
-        method for extra options. This hash will contain the extra key/value pair `skip_version => 1` whenever the **wants\_deploy** attribute is true.
-
-
-- **`pre_deploy_hook`** => `$pre_deploy_hook` (_Optional_)
-
+- **`pre_deploy_hook`** => `$pre_deploy_hook` (_Optional_)  
     A CodeRef to execute _before_ `$schema->deploy` is called.
 
     This CodeRef is called with an instantiated `$your_schema_class` object as argument.
 
-
-- **`post_connect_hook`** => `$post_connect_hook` (_Optional_)
-
+- **`post_connect_hook`** => `$post_connect_hook` (_Optional_)  
     A coderef to execute _after_ `$schema->deploy` is called, if at all.
 
     This coderef is called with an instantiated `$your_schema_class` object as argument.
 
-
-- **`TMPL_DB`** => `$template_database` (_Optional_, `template1`)
-
+- **`TMPL_DB`** => `$template_database` (_Optional_, `template1`)  
     In order to create and drop your test database a temporary connection needs to
     be made to the PostgreSQL instance from your dsn, but with a template database
     (tools like `createdb` and `dropdb` also do this in the background).
@@ -119,9 +105,13 @@ If the database needs deploying, there will be another temporary database
 connection to the template database in order to issue the `CREATE DATABASE
 $dbname` statement.
 
-## `$td->drop_dbic_ok()`
+### Returns
 
-This method implements a `dropdb $dbname` in order not to litter your
+An initialised instance of `$schema_class`.
+
+## `$td->drop_dbic_ok`
+
+This method implements a `dropdb $dbname`, in order not to litter your
 server with test databases.
 
 During this method there will be another temporary database connection to the
@@ -151,7 +141,7 @@ This function uses the cached information of the call to `connect_dbic_pg_ok()`
 and clears it after the database is dropped, using another temporary connection
 to the template database.
 
-See [the `drop_dbic_ok()` method](#-td-drop_dbic_ok-).
+See [the `drop_dbic_ok()` method](#td-drop_dbic_ok).
 
 ## Implementation of `MyDBD_connection_parameters`
 

@@ -5,6 +5,8 @@ use t::Test::abeltje;
 
 use Test::DBIC::Pg;
 
+plan skip_all => "set TEST_ONLINE to enable this test" unless $ENV{TEST_ONLINE};
+
 {
     my ($schema, $td);
     # This is the only Test::Tester thing we do for an actual database

@@ -261,6 +261,7 @@ The compatible with L<Test::DBIC::SQLite> way:
     use Test::DBIC::Pg;
     my $schema = connect_dbic_pg_ok('My::Schema');
     ...
+    $schema->storage->disconnect();
     drop_dbic_pg_ok();
     done_testing();
 

@@ -6,10 +6,10 @@ MANIFEST.SKIP
 META.json
 META.yml
 README.md
-t/00-connection-basics.t
-t/10-connect_dbic_pg_ok.t
-t/10-connect_ok.t
-t/20-example.t
+t/000-basic.t
+t/100-test_online.t
+t/110-connect_dbic_pg_ok.t
+t/120-example.t
 t/Test/abeltje.pm
 t/lib/DummyNocompile.pm
 t/lib/DummyNoconnect.pm
